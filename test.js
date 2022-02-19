@@ -16,7 +16,7 @@ const getMacro = (parser) => {
 	 * @param {string} input
 	 * @param {string} expected
 	 * @param {object} [options]
-	 * @param {prettier.Options} [options.options]
+	 * @param {Partial<import('./index').Options>} [options.options]
 	 * @param {(res: string) => string} [options.transformer]
 	 */
 	function macro(t, input, expected, { options = {}, transformer = (res) => res.split('\n')[0] } = {}) {
@@ -60,7 +60,29 @@ test(
 	'import { baz, foo } from "foobar";',
 );
 
+test(
+	'keep partially unused imports',
+	macros,
+	`
+		import { foo, bar, baz } from "foobar";
+
+		const foobar = foo + baz
+	`,
+	'import { bar, baz, foo } from "foobar";',
+	{ options: { removeUnusedImports: false } },
+);
+
 test('removes completely unused imports', macros, 'import { foo } from "foobar"', '');
+
+test(
+	'keep completely unused imports',
+	macros,
+	`
+                import { foo } from "foobar"
+        `,
+	'import { foo } from "foobar";',
+	{ options: { removeUnusedImports: false } },
+);
 
 test(
 	'works with multi-line imports',
