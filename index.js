@@ -5,11 +5,22 @@ const ts = require('typescript');
 
 const { organize } = require('./lib/organize');
 
+/** @typedef {import('prettier').ParserOptions & { removeUnusedImports?: boolean }} Options  */
+
+exports.options = {
+	removeUnusedImports: {
+		type: 'boolean',
+		category: 'Global',
+		default: true,
+		description: 'Remove unused imports.',
+	},
+};
+
 /**
  * Organize the code's imports using the `organizeImports` feature of the TypeScript language service API.
  *
  * @param {string} code
- * @param {import('prettier').ParserOptions} options
+ * @param {Options} options
  */
 const organizeImports = (code, options) => {
 	if (code.includes('// organize-imports-ignore') || code.includes('// tslint:disable:ordered-imports')) {
@@ -37,7 +48,7 @@ const withOrganizeImportsPreprocess = (parser) => {
 		...parser,
 		/**
 		 * @param {string} code
-		 * @param {import('prettier').ParserOptions} options
+		 * @param {Options} options
 		 */
 		preprocess: (code, options) =>
 			organizeImports(parser.preprocess ? parser.preprocess(code, options) : code, options),
